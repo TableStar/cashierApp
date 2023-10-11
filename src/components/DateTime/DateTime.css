@@ -1,0 +1,7 @@
+#dateTime{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+    min-width: 150px;
+
+}
