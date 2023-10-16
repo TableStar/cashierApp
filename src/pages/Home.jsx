@@ -23,6 +23,7 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { loginAction } from "../redux/action/accountAction";
 import { useEffect } from "react";
+import axios from "axios";
 
 function Home() {
   const [inUsername, setInUsername] = useState("");
@@ -31,8 +32,24 @@ function Home() {
   const dispatch = useDispatch();
   const dataGlobal = useSelector((state) => state.accountReducer);
   const onLogin = () => {
-    localStorage.setItem("dataLogin",JSON.stringify({ username: inUsername, password: inPassword },("")));
-    dispatch(loginAction({ username: inUsername, password: inPassword }));
+    //localStorage.setItem("dataLogin",JSON.stringify({ username: inUsername, password: inPassword },("")));
+    //dispatch(loginAction({ username: inUsername, password: inPassword }));
+    axios
+      .get(
+        `http://localhost:2021/account?username=${inUsername}&password=${inPassword}`
+      )
+      .then((response) => {
+        console.log("check user", response.data);
+        if (!response.data.length) {
+          alert("account Not Found");
+        } else {
+          localStorage.setItem("dataLogin", JSON.stringify(response.data[0]));
+          dispatch(loginAction(response.data[0]))
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   };
   useEffect(() => {
     if (dataGlobal.username && dataGlobal.password) {

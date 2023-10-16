@@ -30,7 +30,7 @@ import { FaHamburger } from "react-icons/fa";
 import { AiOutlineMinusSquare } from "react-icons/ai";
 import MenuCards from "../components/MenuCards/MenuCards";
 import SearchDrop from "../components/SearchDrop/SearchDrop";
-import hotplate from "../assets/hotplate.jpg";
+import hotplate from "./assets/hotplate.jpg";
 import soup from "./assets/soup.jpg";
 import BasketDrop from "../components/BasketDrop/BasketDrop";
 import martini from "./assets/martini.jpg";
@@ -39,18 +39,22 @@ import dorayaki from "./assets/dorayaki.jpg";
 import beefBorgar from "./assets/beef-borgar.jpg";
 import porkBorgar from "./assets/pork-borgar.jpg";
 import cake from "./assets/cake.jpg";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
 import { basketAction } from "../redux/action/basketAction";
-
+import axios from "axios";
+import Navbar from "../components/Navbar/Navbar";
+import LayoutPage from "../components/LayoutPage";
 const Dash = () => {
   const [selectedCategory, setSelectedCategory] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [order, setOrder] = useState([]);
+
   const [basketActive, setBasketActive] = useState(false);
+  const [foodMenu, setFoodMenu] = useState([]);
   const dispatch = useDispatch();
   const refBasket = useRef(null);
+  const navigate = useNavigate();
 
   const handleClickScrollToBasket = () => {
     refBasket.current?.scrollIntoView({ behavior: "smooth" });
@@ -67,6 +71,7 @@ const Dash = () => {
       return <Text>Welcome, Cashier {account.username}</Text>;
     }
   };
+
   const categoryButtonProps = [
     {
       label: "button1",
@@ -99,72 +104,18 @@ const Dash = () => {
       text: "Burger",
     },
   ];
-  const foodMenu = [
-    {
-      id: 1,
-      text: "Hot Plate",
-      price: 32000,
-      type: "Hot",
-      gambar: hotplate,
-      isReady: true,
-    },
-    {
-      id: 2,
-      text: "Chicken Soup",
-      price: 18000,
-      type: "Hot",
-      gambar: soup,
-      isReady: true,
-    },
-    {
-      id: 3,
-      text: "Martini",
-      price: 21000,
-      type: "Drink",
-      gambar: martini,
-      isReady: true,
-    },
-    {
-      id: 4,
-      text: "French Fries",
-      price: 12000,
-      type: "Snack",
-      gambar: fries,
-      isReady: true,
-    },
-    {
-      id: 5,
-      text: "Dorayaki",
-      price: 17000,
-      type: "Dessert",
-      gambar: dorayaki,
-      isReady: true,
-    },
-    {
-      id: 6,
-      text: "Beef Borgar",
-      price: 40000,
-      gambar: beefBorgar,
-      type: "Burger",
-      isReady: true,
-    },
-    {
-      id: 7,
-      text: "Grilled Pork Borgar",
-      price: 49000,
-      gambar: porkBorgar,
-      type: "Burger",
-      isReady: true,
-    },
-    {
-      id: 8,
-      text: "Black Forest",
-      price: 41000,
-      gambar: cake,
-      type: "Cake",
-      isReady: true,
-    },
-  ];
+  const getFoodMenu = () => {
+    axios
+      .get(`http://localhost:2023/foodMenu`)
+      .then((response) => {
+        setFoodMenu(response.data);
+      })
+      .catch((error) => {});
+  };
+
+  useEffect(() => {
+    getFoodMenu();
+  }, []);
 
   const filterFood = foodMenu.filter((data) => {
     return data.type === selectedCategory;
@@ -182,27 +133,9 @@ const Dash = () => {
     }
   };
   const OrderList = (data) => {
-    /*const existingOrder = order.find((order) => order.id === props.id);
-    setBasketActive(true);
-    handleClickScrollToBasket();
-    if (existingOrder) {
-      const updatedOrder = order.map((orderItem) =>
-        orderItem.id === props.id
-          ? { ...orderItem, quantity: orderItem.quantity + 1 }
-          : orderItem
-      );
-      setOrder(updatedOrder);
-    } else {
-      const newOrder = foodMenu.find((item) => item.id === props.id);
-      if (newOrder) {
-        newOrder.quantity = 1;
-        setOrder([...order, newOrder]);
-      }
-    }*/
     const idx = basketGlobalState.findIndex((val) => {
       return val.id === data.id;
     });
-    console.log(basketGlobalState);
 
     const temp = [...basketGlobalState];
     setBasketActive(true);
@@ -212,7 +145,6 @@ const Dash = () => {
       temp[idx] = { ...temp[idx], quantity: temp[idx].quantity + 1 };
     }
     dispatch(basketAction(temp));
-    console.log(dispatch(basketAction(temp)));
   };
 
   const onHandleDeleteOrder = (props) => {
@@ -252,57 +184,7 @@ const Dash = () => {
   };
   return (
     <div>
-      <Flex flexDirection={"row"} justifyContent={"flex-start"}>
-        <Box position={"fixed"} zIndex={"100"}>
-          <Flex
-            flexDirection={"column"}
-            id="navbar"
-            bg={"white"}
-            padding={"8px"}
-            height={"800px"}
-            width={"70px"}
-          >
-            <Flex flexDirection="column" gap={"4"}>
-              <Link to={"/"}>
-                <Button
-                  colorScheme="white"
-                  height={"50px"}
-                  width={"50px"}
-                  color={"black"}
-                  _hover={{ color: "red", border: "white" }}
-                >
-                  <Flex
-                    flexDirection={"column"}
-                    alignItems={"center"}
-                    gap={"2"}
-                  >
-                    <IconContext.Provider value={{ size: 20 }}>
-                      <AiOutlineHome />
-                    </IconContext.Provider>
-                    <Text fontSize={"12px"}>Home</Text>
-                  </Flex>
-                </Button>
-              </Link>
-              <Button
-                colorScheme="white"
-                height={"50px"}
-                width={"50px"}
-                color={"black"}
-                _hover={{ color: "red", border: "white" }}
-                _active={"none"}
-                _focus={"none"}
-              >
-                <Flex flexDirection={"column"} alignItems={"center"} gap={"2"}>
-                  <IconContext.Provider value={{ size: 20 }}>
-                    <SiWindows />
-                  </IconContext.Provider>
-                  <Text fontSize={"12px"}>Manage</Text>
-                </Flex>
-              </Button>
-            </Flex>
-          </Flex>
-        </Box>
-        <Flex id="spaceBehindNavbar" height={"800px"} width={"70px"}></Flex>
+      <LayoutPage>
         <Flex id="row02" flexDirection={"row"} gap={"6"} ref={refBasket}>
           <Flex
             flexDirection={"column"}
@@ -482,7 +364,7 @@ const Dash = () => {
             <div></div>
           )}
         </Flex>
-      </Flex>
+      </LayoutPage>
     </div>
   );
 };
